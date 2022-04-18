@@ -1,7 +1,7 @@
 import os
 import time
 import torch
-from config import get_parser, get_cfg
+from configs.config import get_parser, get_cfg
 from data import prepare_dataloaders
 from visualise import visualise
 

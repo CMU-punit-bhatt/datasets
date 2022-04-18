@@ -30,7 +30,7 @@ Check if data is downloaded correctly, by running:
 
 # Configs
 
-## In `config.py` set the following:
+## In the configs flder, refer `config.py` to set the following:
 
 Set `_C.DATASET.DATAROOT = 'data/sets/nuscenes'` according to download path
 
@@ -38,7 +38,7 @@ Leave `_C.DATASET.VERSION = ''` as an empty string
 
 `config.py` has the config parser. The other configs can be found in `baseline.yml` and `single_timeframe.yml`. 
 
-Only `N_WORKERS` need to be set in `baseline.yml`
+Only `N_WORKERS` need to be set in `baseline.yml`. The path to `baseline.yml` can be set `get_cfg` function of `config.py`
 
 # Dataloader
 
@@ -66,9 +66,9 @@ To get the below results, run:
 
 ## Results
 
-![Grid](test_image.png)
+![Grid](images/test_image.png)
 
-![Grid](test_instance_viz.png)
+![Grid](images/test_instance_viz.png)
 
-![Grid](test_segmentation_viz.png)
+![Grid](images/test_segmentation_viz.png)
 

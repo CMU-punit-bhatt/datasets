@@ -5,7 +5,7 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning.plugins import DDPPlugin
 
-from fiery.config import get_parser, get_cfg
+from configs.config import get_parser, get_cfg
 from fiery.data import prepare_dataloaders
 from fiery.trainer import TrainingModule
 

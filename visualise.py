@@ -10,7 +10,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from PIL import Image
 
-from config import get_cfg
+from configs.config import get_cfg
 from network import NormalizeInverse
 from instance import predict_instance_segmentation_and_trajectories
 from visualisation import plot_instance_map, generate_instance_colours, make_contour, convert_figure_numpy
