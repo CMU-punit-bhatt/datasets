@@ -1,0 +1,148 @@
+import os
+from argparse import ArgumentParser
+from glob import glob
+
+import cv2
+import numpy as np
+import torch
+import torchvision
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from PIL import Image
+
+from config import get_cfg
+from network import NormalizeInverse
+from instance import predict_instance_segmentation_and_trajectories
+from visualisation import plot_instance_map, generate_instance_colours, make_contour, convert_figure_numpy
+
+EXAMPLE_DATA_PATH = 'example_data'
+
+
+def plot_prediction(image, output, cfg, is_instance=False, img_id=0):
+    # Process predictions
+    # consistent_instance_seg, matched_centers = predict_instance_segmentation_and_trajectories(
+    #     output, compute_matched_centers=True
+    # )
+
+    # Plot future trajectories
+    print(output.shape)
+    print(output[:, 0].shape)
+    unique_ids = torch.unique(output[:, 0]).cpu().long().numpy()[1:]
+    instance_map = dict(zip(unique_ids, unique_ids))
+    # instance_colours = generate_instance_colours(instance_map)
+    vis_image = plot_instance_map(output[:, 0].cpu().numpy(), instance_map)
+    # trajectory_img = np.zeros(vis_image.shape, dtype=np.uint8)
+    # for instance_id in unique_ids:
+    #     path = matched_centers[instance_id]
+    #     for t in range(len(path) - 1):
+    #         color = instance_colours[instance_id].tolist()
+    #         cv2.line(trajectory_img, tuple(path[t]), tuple(path[t + 1]),
+    #                  color, 4)
+
+    # Overlay arrows
+    # temp_img = cv2.addWeighted(vis_image, 0.7, trajectory_img, 0.3, 1.0)
+    # mask = ~ np.all(trajectory_img == 0, axis=2)
+    # vis_image[mask] = temp_img[mask]
+
+    # Plot present RGB frames and predictions
+    val_w = 2.99
+    cameras = cfg.IMAGE.NAMES
+    image_ratio = cfg.IMAGE.FINAL_DIM[0] / cfg.IMAGE.FINAL_DIM[1]
+    val_h = val_w * image_ratio
+    fig = plt.figure(figsize=(4 * val_w, 2 * val_h))
+    width_ratios = (val_w, val_w, val_w, val_w)
+    gs = mpl.gridspec.GridSpec(2, 4, width_ratios=width_ratios)
+    gs.update(wspace=0.0, hspace=0.0, left=0.0, right=1.0, top=1.0, bottom=0.0)
+
+    denormalise_img = torchvision.transforms.Compose(
+        (NormalizeInverse(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+         torchvision.transforms.ToPILImage(),)
+    )
+    for imgi, img in enumerate(image[0, -1]):
+        ax = plt.subplot(gs[imgi // 3, imgi % 3])
+        showimg = denormalise_img(img.cpu())
+        if imgi > 2:
+            showimg = showimg.transpose(Image.FLIP_LEFT_RIGHT)
+
+        plt.annotate(cameras[imgi].replace('_', ' ').replace('CAM ', ''), (0.01, 0.87), c='white',
+                     xycoords='axes fraction', fontsize=14)
+        plt.imshow(showimg)
+        plt.axis('off')
+
+    ax = plt.subplot(gs[:, 3])
+    img = make_contour(vis_image[::-1, ::-1])
+    if is_instance:
+      plt.imsave(f"test_instance_viz_{img_id}.png", img)
+    else:
+      plt.imsave(f"test_segmentation_viz_{img_id}.png", img)
+    plt.imshow(img)
+    plt.axis('off')
+
+    plt.draw()
+    figure_numpy = convert_figure_numpy(fig)
+    plt.close()
+    return figure_numpy
+
+
+def download_example_data():
+    from requests import get
+
+    def download(url, file_name):
+        # open in binary mode
+        with open(file_name, "wb") as file:
+            # get request
+            response = get(url)
+            # write to file
+            file.write(response.content)
+
+    os.makedirs(EXAMPLE_DATA_PATH, exist_ok=True)
+    url_list = ['https://github.com/wayveai/fiery/releases/download/v1.0/example_1.npz',
+                'https://github.com/wayveai/fiery/releases/download/v1.0/example_2.npz',
+                'https://github.com/wayveai/fiery/releases/download/v1.0/example_3.npz',
+                'https://github.com/wayveai/fiery/releases/download/v1.0/example_4.npz'
+                ]
+    for url in url_list:
+        download(url, os.path.join(EXAMPLE_DATA_PATH, os.path.basename(url)))
+
+
+def visualise(data, output_file, img_id=0):
+
+    device = torch.device('cuda:0')
+
+    cfg = get_cfg()
+
+    # Download example data
+    # download_example_data()
+    # Load data
+
+    # for data_path in sorted(glob(os.path.join(EXAMPLE_DATA_PATH, '*.npz'))):
+        # data = np.load(data_path)
+        # image = torch.from_numpy(data['image']).to(device)
+        # intrinsics = torch.from_numpy(data['intrinsics']).to(device)
+        # extrinsics = torch.from_numpy(data['extrinsics']).to(device)
+        # future_egomotions = torch.from_numpy(data['future_egomotion']).to(device)
+        # with torch.no_grad():
+            # output = trainer.model(image, intrinsics, extrinsics, future_egomotions)
+
+        # figure_numpy = plot_prediction(image, output, trainer.cfg)
+
+    image = data['image'].to(device)
+    instance = data['instance'].to(device)
+    segmentation = data['segmentation'].to(device)
+  
+    figure_numpy = plot_prediction(image, instance, cfg, is_instance=True, img_id=img_id)
+    figure_numpy = plot_prediction(image, segmentation, cfg, img_id=img_id)
+
+    # os.makedirs('./output_vis', exist_ok=True)
+    # output_filename = os.path.join('./output_vis', os.path.basename(data_path).split('.')[0]) + '.png'
+    Image.fromarray(figure_numpy).save(output_file)
+    print(f'Saved output to {output_file}')
+
+
+if __name__ == '__main__':
+    parser = ArgumentParser(description='Fiery visualisation')
+    parser.add_argument('--checkpoint', default='./fiery.ckpt', type=str, help='path to checkpoint')
+
+    args = parser.parse_args()
+
+    visualise(args.checkpoint)
