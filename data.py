@@ -279,7 +279,9 @@ class FuturePredictionDataset(torch.utils.data.Dataset):
 
             poly_region, z = self._get_poly_region_in_image(annotation, translation, rotation)
             cv2.fillPoly(instance, [poly_region], instance_id)
-            cv2.fillPoly(segmentation, [poly_region], 1.0)
+
+            c = (1.0, 0.0, 0.0) if 'vehicle' in annotation['category_name'] else (0.0, 1.0, 0.0)
+            cv2.fillPoly(segmentation, [poly_region], color=c)
             cv2.fillPoly(z_position, [poly_region], z)
             cv2.fillPoly(attribute_label, [poly_region], instance_attribute)
 
@@ -289,6 +291,8 @@ class FuturePredictionDataset(torch.utils.data.Dataset):
         box = Box(
             instance_annotation['translation'], instance_annotation['size'], Quaternion(instance_annotation['rotation'])
         )
+        if "vehicle" not in instance_annotation['category_name']:
+           box.wlh *= 2
         box.translate(ego_translation)
         box.rotate(ego_rotation)
 

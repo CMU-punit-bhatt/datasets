@@ -189,9 +189,9 @@ def plot_instance_map(instance_image, instance_map, instance_colours=None, bg_im
     if instance_colours is None:
         instance_colours = generate_instance_colours(instance_map)
           
-    # if len(instance_image.shape) > 2:
-    #     instance_image = instance_image.reshape((instance_image.shape[-2], instance_image.shape[-1]))
-    instance_image = np.swapaxes(instance_image, 0, 2)
+    if len(instance_image.shape) > 2:
+        instance_image = instance_image.reshape((instance_image.shape[-2], instance_image.shape[-1]))
+    # instance_image = np.swapaxes(instance_image, 0, 2)
 
     if bg_image is None:
         plot_image = 255 * np.ones((instance_image.shape[0], instance_image.shape[1], 3), dtype=np.uint8)
@@ -199,7 +199,6 @@ def plot_instance_map(instance_image, instance_map, instance_colours=None, bg_im
         plot_image = bg_image
 
     for key, value in instance_colours.items():
-        import pdb; pdb.set_trace()
         plot_image[instance_image == key] = value
 
     return plot_image

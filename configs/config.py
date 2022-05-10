@@ -67,6 +67,8 @@ _C.IMAGE.NAMES = ['CAM_FRONT_LEFT', 'CAM_FRONT', 'CAM_FRONT_RIGHT', 'CAM_BACK_LE
 _C.LIFT = CN()  # image to BEV lifting
 _C.LIFT.X_BOUND = [-50.0, 50.0, 0.5]  # Forward
 _C.LIFT.Y_BOUND = [-50.0, 50.0, 0.5]  # Sides
+# _C.LIFT.X_BOUND = [-128.0, 128.0, 0.5]  # Forward
+# _C.LIFT.Y_BOUND = [-128.0, 128.0, 0.5]  # Sides
 _C.LIFT.Z_BOUND = [-10.0, 10.0, 20.0]  # Height
 _C.LIFT.D_BOUND = [2.0, 50.0, 1.0]
 

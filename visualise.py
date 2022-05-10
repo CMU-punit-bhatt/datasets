@@ -10,7 +10,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from PIL import Image
 
-from configs.config import get_cfg
+from config import get_cfg
 from network import NormalizeInverse
 from instance import predict_instance_segmentation_and_trajectories
 from visualisation import plot_instance_map, generate_instance_colours, make_contour, convert_figure_numpy
@@ -18,7 +18,7 @@ from visualisation import plot_instance_map, generate_instance_colours, make_con
 EXAMPLE_DATA_PATH = 'example_data'
 
 
-def plot_prediction(image, output, cfg, is_instance=False, img_id=0):
+def plot_prediction(image, output, cfg, is_instance=False):
     # Process predictions
     # consistent_instance_seg, matched_centers = predict_instance_segmentation_and_trajectories(
     #     output, compute_matched_centers=True
@@ -26,11 +26,11 @@ def plot_prediction(image, output, cfg, is_instance=False, img_id=0):
 
     # Plot future trajectories
     print(output.shape)
-    print(output[:, 0].shape)
-    unique_ids = torch.unique(output[:, 0]).cpu().long().numpy()[1:]
+    print(output[0, 0].shape)
+    unique_ids = torch.unique(output[0, 0]).cpu().long().numpy()[1:]
     instance_map = dict(zip(unique_ids, unique_ids))
     # instance_colours = generate_instance_colours(instance_map)
-    vis_image = plot_instance_map(output[:, 0].cpu().numpy(), instance_map)
+    vis_image = plot_instance_map(output[0, 0].cpu().numpy(), instance_map)
     # trajectory_img = np.zeros(vis_image.shape, dtype=np.uint8)
     # for instance_id in unique_ids:
     #     path = matched_centers[instance_id]
@@ -72,9 +72,9 @@ def plot_prediction(image, output, cfg, is_instance=False, img_id=0):
     ax = plt.subplot(gs[:, 3])
     img = make_contour(vis_image[::-1, ::-1])
     if is_instance:
-      plt.imsave(f"test_instance_viz_{img_id}.png", img)
+      plt.imsave("test_instance_viz.png", img)
     else:
-      plt.imsave(f"test_segmentation_viz_{img_id}.png", img)
+      plt.imsave("test_segmentation_viz.png", img)
     plt.imshow(img)
     plt.axis('off')
 
@@ -105,7 +105,7 @@ def download_example_data():
         download(url, os.path.join(EXAMPLE_DATA_PATH, os.path.basename(url)))
 
 
-def visualise(data, output_file, img_id=0):
+def visualise(data, output_file):
 
     device = torch.device('cuda:0')
 
@@ -130,8 +130,8 @@ def visualise(data, output_file, img_id=0):
     instance = data['instance'].to(device)
     segmentation = data['segmentation'].to(device)
   
-    figure_numpy = plot_prediction(image, instance, cfg, is_instance=True, img_id=img_id)
-    figure_numpy = plot_prediction(image, segmentation, cfg, img_id=img_id)
+    figure_numpy = plot_prediction(image, instance, cfg, is_instance=True)
+    figure_numpy = plot_prediction(image, segmentation, cfg)
 
     # os.makedirs('./output_vis', exist_ok=True)
     # output_filename = os.path.join('./output_vis', os.path.basename(data_path).split('.')[0]) + '.png'
