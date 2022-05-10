@@ -1,6 +1,6 @@
 # Datasets
 
-## This repository contains the code base to extract nuScenes and nuImages datasets. 
+## This repository contains the code required to extract nuScenes and nuImages datasets. 
 1. nuimages_n1 - Generate nuImages segmentation dataset for training N1
 2. nuscenes-bev - Generate nuScenes BEV segmentaion labels for front camera images
 
