@@ -1,3 +1,6 @@
 [submodule "nuscenes/nuscenes/nuimages_dataset"]
 	path = nuscenes/nuscenes/nuimages_dataset
 	url = https://github.com/CMU-punit-bhatt/nuImages_dataset
+[submodule "nuscenes/nuimages_dataset"]
+	path = nuscenes/nuimages_dataset
+	url = https://github.com/CMU-punit-bhatt/nuImages_dataset
