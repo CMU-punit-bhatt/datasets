@@ -38,7 +38,7 @@ Only `N_WORKERS` need to be set in `baseline.yml`. The path to `baseline.yml` ca
 To get the below results, run:
 
 ```
-python collect_bev_data.py
+python collect_bev_data.py --rgb <path to save RGB images> --seg <path to save segmentation labels with Carla mapping> --seg_viz <path to save segmentation labels visualization>
 ```
 
 ## Results
