@@ -48,6 +48,10 @@ python collect_bev_data.py --rgb <path to save RGB images> --seg <path to save s
 | ![Grid](images/1.jpeg)      | ![Grid](images/3.jpeg)       |
 
 
+# Credits
+Code borrowed from: https://github.com/wayveai/fiery
+
+
 
 
 
